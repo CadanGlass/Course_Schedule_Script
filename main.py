@@ -9,8 +9,23 @@ import win32timezone
 def get_emails(from_date, subject_keyword):
     try:
         outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-        inbox = outlook.GetDefaultFolder(6)
-        messages = inbox.Items
+        inbox = outlook.GetDefaultFolder(6)  # 6 refers to the Inbox
+
+        # **New Code Starts Here**
+        # Access the "Schedule Changes" subfolder within the Inbox
+        schedule_changes_folder = None
+        for folder in inbox.Folders:
+            if folder.Name.lower() == "schedule changes":
+                schedule_changes_folder = folder
+                break
+
+        if not schedule_changes_folder:
+            print('Subfolder "Schedule Changes" not found in Inbox.')
+            return []
+
+        messages = schedule_changes_folder.Items
+        # **New Code Ends Here**
+
         messages.Sort("[SentOn]", Descending=False)
 
         restrict_date = from_date.strftime('%m/%d/%Y 12:00 AM')
